@@ -1,10 +1,40 @@
-
 {% extends 'base.html' %}
-
 {% block title %}Home - Water Monitor{% endblock %}
 
 {% block content %}
-    <h1>Welcome, {{ user.username }}!</h1>
-    <p>This is your home page.</p>
-    <a href="{% url 'water_data' %}">Go to Water Data</a>
+<h1>Welcome back, {{ user.username }}!</h1>
+
+<div class="grid-two-col">
+
+    <!-- Quick Overview Card -->
+    <div class="card">
+        <h2>Quick Overview</h2>
+        {% if latest_data %}
+            <p><strong>Water Level:</strong> {{ latest_data.water_level }}%</p>
+            <p><strong>Conductivity:</strong> {{ latest_data.conductivity }} µS/cm</p>
+            <p><strong>Last Updated:</strong> {{ latest_data.timestamp|date:"H:i d M Y" }}</p>
+        {% else %}
+            <p>No data available yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- Mini Graph Card -->
+    <div class="card">
+        <h2>Recent Readings Graph</h2>
+        <img src="{% url 'water_level_graph' %}" alt="Water Graph" style="max-width: 100%; height: auto;">
+    </div>
+
+    <!-- Alerts Card -->
+    <div class="card span-2">
+        <h2>Alerts</h2>
+        {% if alert %}
+            <div class="alert">
+                 {{ alert }}
+            </div>
+        {% else %}
+            <p>All systems normal. No alerts at this time.</p>
+        {% endif %}
+    </div>
+
+</div>
 {% endblock %}

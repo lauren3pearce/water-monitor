@@ -22,8 +22,19 @@ def signup(request):
 
 @login_required
 def home(request):
-    return render(request, 'monitor/home.html')
+    data = WaterData.objects.filter(user=request.user).order_by('-timestamp')
+    latest_data = data.first()
 
+    # Example alert logic: trigger if water level is too low
+    alert = None
+    if latest_data and latest_data.water_level < 20:
+        alert = f"Water level is low ({latest_data.water_level}%). Please check the sensor!"
+
+    context = {
+        'latest_data': latest_data,
+        'alert': alert
+    }
+    return render(request, 'monitor/home.html', context)
 
 # View to display water level and conductivity data
 @login_required
@@ -54,3 +65,10 @@ def water_level_graph(request):
     buffer.seek(0)
     
     return HttpResponse(buffer, content_type='image/png')
+
+
+def about(request):
+    return render(request, 'monitor/about.html')
+
+def contact(request):
+    return render(request, 'monitor/contact.html')
