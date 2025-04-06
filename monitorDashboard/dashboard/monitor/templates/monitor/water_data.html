@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Data</title>
+</head>
+<body>
+    <h1>Water Data for {{ user.username }}</h1>
+    
+    <h2>Water Level and Conductivity Data</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Water Level</th>
+                <th>Conductivity</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in data %}
+            <tr>
+                <td>{{ entry.timestamp }}</td>
+                <td>{{ entry.water_level }}</td>
+                <td>{{ entry.conductivity }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Water Level and Conductivity Graph</h2>
+    <img src="{% url 'water_level_graph' %}" alt="Water Level and Conductivity Graph">
+
+</body>
+</html>
