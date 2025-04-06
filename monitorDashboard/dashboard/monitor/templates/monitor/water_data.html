@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Water Data - Water Monitor{% endblock %}
+
+{% block content %}
+    <h1>Water Data</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Water Level</th>
+                <th>Conductivity</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in data %}
+            <tr>
+                <td>{{ entry.timestamp }}</td>
+                <td>{{ entry.water_level }}</td>
+                <td>{{ entry.conductivity }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

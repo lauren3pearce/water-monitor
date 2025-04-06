@@ -1,0 +1,10 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Home - Water Monitor{% endblock %}
+
+{% block content %}
+    <h1>Welcome, {{ user.username }}!</h1>
+    <p>This is your home page.</p>
+    <a href="{% url 'water_data' %}">Go to Water Data</a>
+{% endblock %}

@@ -1,0 +1,15 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Sign Up - Water Monitor{% endblock %}
+
+{% block content %}
+    <h1>Sign Up</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Sign Up</button>
+    </form>
+    <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+
+{% endblock %}
