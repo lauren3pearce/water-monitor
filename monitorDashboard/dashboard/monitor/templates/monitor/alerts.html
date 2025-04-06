@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Alerts - Water Monitor{% endblock %}
+{% block content %}
+<h2>All Alerts</h2>
+
+{% if alerts %}
+<table style="width:100%; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <th style="text-align:left; border-bottom: 2px solid #ccc;">Timestamp</th>
+            <th style="text-align:left; border-bottom: 2px solid #ccc;">Level</th>
+            <th style="text-align:left; border-bottom: 2px solid #ccc;">Message</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for alert in alerts %}
+        <tr>
+            <td>{{ alert.timestamp|date:"d M Y, H:i" }}</td>
+            <td>{{ alert.level }}</td>
+            <td>{{ alert.message }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No alerts yet. Everything is running smoothly!</p>
+{% endif %}
+{% endblock %}

@@ -16,12 +16,14 @@
         {% else %}
             <p>No data available yet.</p>
         {% endif %}
+        <a href="{% url 'water_data' %}"><button>View Full Data</button></a>
     </div>
 
     <!-- Mini Graph Card -->
     <div class="card">
         <h2>Recent Readings Graph</h2>
         <img src="{% url 'water_level_graph' %}" alt="Water Graph" style="max-width: 100%; height: auto;">
+        <a href="{% url 'water_level_graph' %}"><button>View Full Graph</button></a>
     </div>
 
     <!-- Alerts Card -->
@@ -34,6 +36,7 @@
         {% else %}
             <p>All systems normal. No alerts at this time.</p>
         {% endif %}
+        <a href="{% url 'alerts' %}"><button>View All Alerts</button></a>
     </div>
 
 </div>
