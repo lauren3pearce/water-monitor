@@ -1,14 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Water Data</title>
-</head>
-<body>
-    <h1>Water Data for {{ user.username }}</h1>
-    
-    <h2>Water Level and Conductivity Data</h2>
+{% extends 'base.html' %}
+
+{% block title %}Water Data - Water Monitor{% endblock %}
+
+{% block content %}
+    <h1>Water Data</h1>
     <table border="1">
         <thead>
             <tr>
@@ -27,9 +22,4 @@
             {% endfor %}
         </tbody>
     </table>
-
-    <h2>Water Level and Conductivity Graph</h2>
-    <img src="{% url 'water_level_graph' %}" alt="Water Level and Conductivity Graph">
-
-</body>
-</html>
+{% endblock %}
