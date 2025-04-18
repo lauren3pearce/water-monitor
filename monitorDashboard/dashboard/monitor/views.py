@@ -1,12 +1,12 @@
 from django.shortcuts import render
-from .models import WaterData, Alert
+from .models import WaterData, Alert, UserSettings
 import matplotlib.pyplot as plt
 from io import BytesIO
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
-from .forms import CustomUserCreationForm
+from .forms import CustomUserCreationForm, UserSettingsForm
 from django.utils import timezone
 import csv, json
 from django.db.models import Avg, Count
@@ -15,6 +15,10 @@ from datetime import datetime, timedelta
 from django.db.models import DateField
 from django.utils.dateformat import format
 from django.db.models.functions import TruncDay, TruncWeek, TruncMonth
+from django.contrib import messages
+from django.contrib.messages import get_messages
+from django.conf import settings
+from django.core.mail import send_mail
 
 # Create your views here.
 
@@ -30,34 +34,54 @@ def signup(request):
 
 @login_required
 def home(request):
-    # Get latest data for the logged-in user
-    data = WaterData.objects.filter(user=request.user).order_by('-timestamp')
-    latest_data = data.first()
+    # Clear leftover messages
+    list(get_messages(request))
 
-    alert = None  # Message to show on the homepage
+    # Get last 20 readings
+    data = WaterData.objects.filter(user=request.user).order_by('-timestamp')[:20]
+    data = list(reversed(list(data)))  # Ensure iterable twice
 
+    latest_data = data[-1] if data else None
+
+    timestamps = [format(d.timestamp, 'H:i:s') for d in data]
+    water_levels = [d.water_level for d in data]
+    conductivity = [d.conductivity for d in data]
+
+    # Get user settings for thresholds + notifications
+    user_settings, _ = UserSettings.objects.get_or_create(user=request.user)
+
+    alert = None
     if latest_data:
-        # Conditions
-        low_water_level = latest_data.water_level < 20
-        high_conductivity = latest_data.conductivity > 200
-
-        # Generate alert message
-        if low_water_level:
+        if latest_data.water_level < user_settings.low_water_threshold:
             alert = f"Low water level detected: {latest_data.water_level}%"
+            created, _ = Alert.objects.get_or_create(user=request.user, message=alert, level="Warning")
+            if created and user_settings.notify_low_water:
+                send_mail(
+                    'Water Monitor Alert - Low Water Level',
+                    alert,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [request.user.email],
+                    fail_silently=True,
+                )
 
-            # Save alert if it hasn't already been saved today
-            if not Alert.objects.filter(user=request.user, message=alert, timestamp__date=timezone.now().date()).exists():
-                Alert.objects.create(user=request.user, message=alert, level="Warning")
-
-        elif high_conductivity:
+        elif latest_data.conductivity > user_settings.high_conductivity_threshold:
             alert = f"High conductivity detected: {latest_data.conductivity} µS/cm"
-
-            if not Alert.objects.filter(user=request.user, message=alert, timestamp__date=timezone.now().date()).exists():
-                Alert.objects.create(user=request.user, message=alert, level="Warning")
+            created, _ = Alert.objects.get_or_create(user=request.user, message=alert, level="Warning")
+            if created and user_settings.notify_high_conductivity:
+                send_mail(
+                    'Water Monitor Alert - High Conductivity',
+                    alert,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [request.user.email],
+                    fail_silently=True,
+                )
 
     context = {
         'latest_data': latest_data,
-        'alert': alert
+        'alert': alert,
+        'timestamps': timestamps,
+        'water_levels': water_levels,
+        'conductivity': conductivity,
     }
 
     return render(request, 'monitor/home.html', context)
@@ -260,3 +284,18 @@ def export_csv(request):
         writer.writerow([row.timestamp, row.water_level, row.conductivity])
 
     return response
+
+@login_required
+def settings_view(request):
+    settings, created = UserSettings.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form = UserSettingsForm(request.POST, instance=settings)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Settings updated successfully.")
+            return redirect('settings')
+    else:
+        form = UserSettingsForm(instance=settings)
+
+    return render(request, 'monitor/settings.html', {'form': form})

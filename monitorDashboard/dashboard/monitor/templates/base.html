@@ -70,10 +70,16 @@
             <li><a href="{% url 'water_data' %}">Water Data</a></li>
             <li><a href="{% url 'water_level_graph' %}">Water Graph</a></li>
             <li><a href="{% url 'alerts' %}">Alerts</a></li>
+            
         </ul>
         <div class="nav-icons">
             {% if user.is_authenticated %}
-                <i class="fas fa-bell"></i>
+                <a href="{% url 'alerts' %}" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                </a>
+                <a href="{% url 'settings' %}" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </a>
                 <i class="fas fa-user-circle"></i>
                 <a href="{% url 'logout' %}"><button>Logout</button></a>
             {% else %}
@@ -99,5 +105,22 @@
         </div>
     </footer>
 
-
+    {% if messages %}
+        <div class="message-container">
+            {% for message in messages %}
+            <div class="alert {{ message.tags }}">
+                {{ message }}
+                <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 </body>
+
+<script>
+    setTimeout(() => {
+      document.querySelectorAll('.alert').forEach(el => {
+        el.style.display = 'none';
+      });
+    }, 5000);
+</script>
