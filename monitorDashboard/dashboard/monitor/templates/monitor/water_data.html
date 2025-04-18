@@ -4,6 +4,75 @@
 
 {% block content %}
     <h1>Water Data</h1>
+
+    <!-- Quick filter buttons -->
+    <div class="quick-filters" style="margin-bottom: 10px;">
+        <a href="?quick_filter=7days"><button {% if quick_filter == '7days' %}class="active"{% endif %}>Last 7 Days</button></a>
+        <a href="?quick_filter=thismonth"><button {% if quick_filter == 'thismonth' %}class="active"{% endif %}>This Month</button></a>
+        <a href="?quick_filter=all"><button {% if quick_filter == 'all' or not quick_filter %}class="active"{% endif %}>All Time</button></a>
+    </div>
+
+    <!-- Group by dropdown -->
+    <form method="get" style="margin-bottom: 10px;">
+        <!-- Preserve filters -->
+        <input type="hidden" name="quick_filter" value="{{ quick_filter }}">
+        <input type="hidden" name="start_date" value="{{ start_date }}">
+        <input type="hidden" name="end_date" value="{{ end_date }}">
+
+        <label for="group_by">Group by:</label>
+        <select name="group_by" onchange="this.form.submit()">
+            <option value="">-- None --</option>
+            <option value="day" {% if group_by == 'day' %}selected{% endif %}>Day</option>
+            <option value="week" {% if group_by == 'week' %}selected{% endif %}>Week</option>
+            <option value="month" {% if group_by == 'month' %}selected{% endif %}>Month</option>
+        </select>
+    </form>
+
+    <!-- Date range filter -->
+    <form method="get" class="filter-form">
+        <label>
+            From:
+            <input type="date" name="start_date" value="{{ start_date }}">
+        </label>
+        <label>
+            To:
+            <input type="date" name="end_date" value="{{ end_date }}">
+        </label>
+        <button type="submit">Filter</button>
+        <a href="{% url 'water_data' %}"><button type="button">Reset</button></a>
+    </form>
+
+    <!-- Download CSV button -->
+    <a href="{% url 'export_csv' %}?start_date={{ start_date }}&end_date={{ end_date }}">
+        <button style="margin-bottom: 15px;">Download CSV</button>
+    </a>
+
+    <!-- Summary data (if grouped) -->
+    {% if summary_data %}
+        <h2>Summarized Data (Grouped by {{ group_by }})</h2>
+        <table border="1" style="margin-bottom: 30px;">
+            <thead>
+                <tr>
+                    <th>Period</th>
+                    <th>Avg Water Level (%)</th>
+                    <th>Avg Conductivity (µS/cm)</th>
+                    <th>Readings Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in summary_data %}
+                <tr>
+                    <td>{{ item.period|date:"d M Y" }}</td>
+                    <td>{{ item.avg_water_level|floatformat:1 }}</td>
+                    <td>{{ item.avg_conductivity|floatformat:1 }}</td>
+                    <td>{{ item.count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    <!-- Raw readings table -->
     <table border="1">
         <thead>
             <tr>

@@ -1,8 +1,37 @@
 {% extends 'base.html' %}
+
 {% block title %}Alerts - Water Monitor{% endblock %}
+
 {% block content %}
 <h2>All Alerts</h2>
 
+<!-- Filter Form -->
+<form method="get" class="filter-form" style="margin-bottom: 20px;">
+    <label>
+        From:
+        <input type="date" name="start_date" value="{{ start_date }}">
+    </label>
+    <label>
+        To:
+        <input type="date" name="end_date" value="{{ end_date }}">
+    </label>
+    <label>
+        Alert Type:
+        <select name="type">
+            <option value="">-- All --</option>
+            <option value="level" {% if alert_type == 'level' %}selected{% endif %}>Water Level</option>
+            <option value="conductivity" {% if alert_type == 'conductivity' %}selected{% endif %}>Conductivity</option>
+        </select>
+    </label>
+    <button type="submit">Filter</button>
+    <a href="{% url 'alerts' %}"><button type="button">Reset</button></a>
+</form>
+
+<a href="{% url 'export_alerts_csv' %}?start_date={{ start_date }}&end_date={{ end_date }}&type={{ alert_type }}">
+    <button style="margin-bottom: 15px;">Download CSV</button>
+</a>
+
+<!-- Alert Table -->
 {% if alerts %}
 <table style="width:100%; border-collapse: collapse;">
     <thead>
@@ -23,6 +52,7 @@
     </tbody>
 </table>
 {% else %}
-<p>No alerts yet. Everything is running smoothly!</p>
+<p>No alerts found for selected filter.</p>
 {% endif %}
 {% endblock %}
+

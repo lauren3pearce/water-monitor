@@ -163,3 +163,75 @@ button:hover {
 .footer-container ul li a:hover {
     text-decoration: underline;
 }
+.filter-form {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.filter-form label {
+    display: flex;
+    flex-direction: column;
+    font-weight: bold;
+    color: #0b2c3a;
+    font-size: 14px;
+}
+
+.filter-form input[type="date"] {
+    padding: 6px 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-top: 5px;
+    color: #0b2c3a;
+}
+
+.filter-form button {
+    background-color: #0b2c3a;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s ease;
+}
+
+.filter-form button:hover {
+    background-color: #d3f9d8;
+    color: #0b2c3a;
+}
+
+
+.quick-filters button {
+    background-color: #f0f0f0;
+    color: #0b2c3a;
+    border: 1px solid #ccc;
+    padding: 6px 12px;
+    margin-right: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s ease;
+}
+
+.quick-filters button:hover {
+    background-color: #d3f9d8;
+    border-color: #d3f9d8;
+    color: #0b2c3a;
+}
+
+.quick-filters .active {
+    background-color: #0b2c3a;
+    color: white;
+    border: 1px solid #0b2c3a;
+}
+
+select {
+    padding: 6px 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
