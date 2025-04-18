@@ -2,17 +2,18 @@ from django.shortcuts import render
 from .models import WaterData, Alert
 import matplotlib.pyplot as plt
 from io import BytesIO
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 from .forms import CustomUserCreationForm
 from django.utils import timezone
-import csv
+import csv, json
 from django.db.models import Avg, Count
 from django.utils import timezone
 from datetime import datetime, timedelta
 from django.db.models import DateField
+from django.utils.dateformat import format
 from django.db.models.functions import TruncDay, TruncWeek, TruncMonth
 
 # Create your views here.
@@ -131,26 +132,44 @@ def about(request):
 @login_required
 def water_level_graph(request):
     data = WaterData.objects.filter(user=request.user).order_by('timestamp')
-    times = [entry.timestamp for entry in data]
-    levels = [entry.water_level for entry in data]
+
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    if start_date and end_date:
+        try:
+            start = datetime.strptime(start_date, '%Y-%m-%d')
+            end = datetime.strptime(end_date, '%Y-%m-%d')
+            data = data.filter(timestamp__date__range=(start, end))
+        except ValueError:
+            pass  # Ignore invalid dates
+
+    timestamps = [format(entry.timestamp, 'H:i:s') for entry in data]
+    water_levels = [entry.water_level for entry in data]
     conductivity = [entry.conductivity for entry in data]
 
-    plt.figure(figsize=(10, 6))
-    plt.plot(times, levels, label="Water Level", marker="o")
-    plt.plot(times, conductivity, label="Conductivity", marker="o")
-    plt.xlabel('Time')
-    plt.ylabel('Values')
-    plt.title('Water Level and Conductivity Over Time')
-    plt.xticks(rotation=45)
-    plt.legend()
+    context = {
+        'timestamps': json.dumps(timestamps),
+        'water_levels': json.dumps(water_levels),
+        'conductivity': json.dumps(conductivity),
+        'start_date': start_date or '',
+        'end_date': end_date or '',
+    }
 
-    # Save the plot to a BytesIO object
-    buffer = BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
-    
-    return HttpResponse(buffer, content_type='image/png')
+    return render(request, 'monitor/graph.html', context)
+@login_required
+def get_graph_data(request):
+    latest = WaterData.objects.filter(user=request.user).order_by('-timestamp')[:1]
 
+    timestamps = [format(entry.timestamp, 'H:i:s') for entry in latest]
+    water_levels = [entry.water_level for entry in latest]
+    conductivity = [entry.conductivity for entry in latest]
+
+    return JsonResponse({
+        'timestamps': timestamps,
+        'water_levels': water_levels,
+        'conductivity': conductivity
+    })
 
 @login_required
 def alerts_list(request):

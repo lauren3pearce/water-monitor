@@ -10,4 +10,5 @@ urlpatterns = [
     path('alerts/', views.alerts_list, name='alerts'),
     path('export/', views.export_csv, name='export_csv'),
     path('alerts/export/', views.export_alerts_csv, name='export_alerts_csv'),
+    path('graph/data/', views.get_graph_data, name='get_graph_data'),
 ]
