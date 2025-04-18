@@ -18,11 +18,12 @@ from django.contrib import admin
 from django.urls import path, include
 from monitor import views
 from django.contrib.auth import views as auth_views
+from django.shortcuts import redirect
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('admin/', admin.site.urls),
     path('monitor/', include('monitor.urls')),
+    path('', lambda request: redirect('home')),
     path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('accounts/signup/', views.signup, name='signup'),
