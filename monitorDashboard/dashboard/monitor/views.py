@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import WaterData
+from .models import WaterData, Alert
 import matplotlib.pyplot as plt
 from io import BytesIO
 from django.http import HttpResponse
@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 from .forms import CustomUserCreationForm
+from django.utils import timezone
 
 # Create your views here.
 
@@ -22,18 +23,36 @@ def signup(request):
 
 @login_required
 def home(request):
+    # Get latest data for the logged-in user
     data = WaterData.objects.filter(user=request.user).order_by('-timestamp')
     latest_data = data.first()
 
-    # Example alert logic: trigger if water level is too low
-    alert = None
-    if latest_data and latest_data.water_level < 20:
-        alert = f"Water level is low ({latest_data.water_level}%). Please check the sensor!"
+    alert = None  # Message to show on the homepage
+
+    if latest_data:
+        # Conditions
+        low_water_level = latest_data.water_level < 20
+        high_conductivity = latest_data.conductivity > 200
+
+        # Generate alert message
+        if low_water_level:
+            alert = f"Low water level detected: {latest_data.water_level}%"
+
+            # Save alert if it hasn't already been saved today
+            if not Alert.objects.filter(user=request.user, message=alert, timestamp__date=timezone.now().date()).exists():
+                Alert.objects.create(user=request.user, message=alert, level="Warning")
+
+        elif high_conductivity:
+            alert = f"High conductivity detected: {latest_data.conductivity} µS/cm"
+
+            if not Alert.objects.filter(user=request.user, message=alert, timestamp__date=timezone.now().date()).exists():
+                Alert.objects.create(user=request.user, message=alert, level="Warning")
 
     context = {
         'latest_data': latest_data,
         'alert': alert
     }
+
     return render(request, 'monitor/home.html', context)
 
 # View to display water level and conductivity data
@@ -65,6 +84,12 @@ def water_level_graph(request):
     buffer.seek(0)
     
     return HttpResponse(buffer, content_type='image/png')
+
+@login_required
+def alerts_list(request):
+    # You can filter by time if needed (e.g., last 7 days)
+    alerts = Alert.objects.filter(user=request.user).order_by('-timestamp')
+    return render(request, 'monitor/alerts.html', {'alerts': alerts})
 
 
 def about(request):
