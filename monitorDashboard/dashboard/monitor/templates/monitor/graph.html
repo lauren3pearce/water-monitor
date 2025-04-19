@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Interactive Graph - Water Monitor{% endblock %}
+
+{% block content %}
+<h1>Water Level and Conductivity</h1>
+
+<form method="get" class="filter-form" style="margin-bottom: 20px;">
+    <label>From: <input type="date" name="start_date" value="{{ start_date }}"></label>
+    <label>To: <input type="date" name="end_date" value="{{ end_date }}"></label>
+    <button type="submit">Filter</button>
+    <a href="{% url 'water_level_graph' %}"><button type="button">Reset</button></a>
+</form>
+
+
+
+<label style="margin-left: 20px;">
+    <input type="checkbox" id="liveToggle" checked>
+    Live Mode
+</label>
+
+<!-- Plotly container -->
+<div id="graph" style="width:100%; max-width:1000px; height:500px;"></div>
+
+<!-- Load Plotly.js -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<script>
+    const initialTimestamps = {{ timestamps|safe }};
+    const initialWaterLevels = {{ water_levels|safe }};
+    const initialConductivity = {{ conductivity|safe }};
+
+    const trace1 = {
+        x: initialTimestamps,
+        y: initialWaterLevels,
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: 'Water Level',
+        line: { color: 'blue' }
+    };
+
+    const trace2 = {
+        x: initialTimestamps,
+        y: initialConductivity,
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: 'Conductivity',
+        line: { color: 'green' }
+    };
+
+    const layout = {
+        title: 'Water Level and Conductivity Over Time',
+        xaxis: { title: 'Time' },
+        yaxis: { title: 'Values' },
+    };
+
+    Plotly.newPlot('graph', [trace1, trace2], layout);
+
+    function fetchLatestDataAndExtend() {
+        const liveMode = document.getElementById("liveToggle").checked;
+        if (!liveMode) return; //  Don't update if live mode is OFF
+
+        fetch("{% url 'get_graph_data' %}")
+            .then(response => response.json())
+            .then(data => {
+                if (data.timestamps.length > 0) {
+                    Plotly.extendTraces('graph', {
+                        x: [[data.timestamps[0]], [data.timestamps[0]]],
+                        y: [[data.water_levels[0]], [data.conductivity[0]]]
+                    }, [0, 1]);
+                }
+            });
+    }
+
+    setInterval(fetchLatestDataAndExtend, 5000);
+</script>
+{% endblock %}

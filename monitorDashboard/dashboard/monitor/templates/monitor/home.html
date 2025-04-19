@@ -22,15 +22,17 @@
     <!-- Mini Graph Card -->
     <div class="card">
         <h2>Recent Readings Graph</h2>
-        <img src="{% url 'water_level_graph' %}" alt="Water Graph" style="max-width: 100%; height: auto;">
-        <a href="{% url 'water_level_graph' %}"><button>View Full Graph</button></a>
+        <div id="mini-graph" style="height: 250px;"></div>
+        <a href="{% url 'water_level_graph' %}">
+            <button>View Full Graph</button>
+        </a>
     </div>
 
     <!-- Alerts Card -->
     <div class="card span-2">
-        <h2>Alerts</h2>
+        <h2>Last Alert</h2>
         {% if alert %}
-            <div class="alert">
+            <div class="inline-alert">
                  {{ alert }}
             </div>
         {% else %}
@@ -40,4 +42,38 @@
     </div>
 
 </div>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    const timestamps = {{ timestamps|safe }};
+    const waterLevels = {{ water_levels|safe }};
+    const conductivity = {{ conductivity|safe }};
+
+    const trace1 = {
+        x: timestamps,
+        y: waterLevels,
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: 'Water Level',
+        line: { color: 'blue' }
+    };
+
+    const trace2 = {
+        x: timestamps,
+        y: conductivity,
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: 'Conductivity',
+        line: { color: 'green' }
+    };
+
+    const layout = {
+        margin: { t: 30, r: 10, l: 40, b: 40 },
+        height: 250,
+        xaxis: { title: '', showgrid: false },
+        yaxis: { title: '', showgrid: false },
+        showlegend: false
+    };
+
+    Plotly.newPlot('mini-graph', [trace1, trace2], layout, { displayModeBar: false });
+</script>
 {% endblock %}

@@ -19,3 +19,18 @@ class Alert(models.Model):
 
     def __str__(self):
         return f"{self.timestamp} - {self.user.username} - {self.message}"
+    
+class UserSettings(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    low_water_threshold = models.IntegerField(default=20)
+    high_conductivity_threshold = models.IntegerField(default=200)
+    reading_interval_seconds = models.IntegerField(default=30)
+
+    # email notifications
+    notify_low_water = models.BooleanField(default=False)
+    notify_high_conductivity = models.BooleanField(default=False)
+    notify_weekly_summary = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Settings for {self.user.username}"
+    
