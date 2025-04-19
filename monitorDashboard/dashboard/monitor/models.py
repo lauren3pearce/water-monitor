@@ -29,6 +29,8 @@ class UserSettings(models.Model):
     # email notifications
     notify_low_water = models.BooleanField(default=False)
     notify_high_conductivity = models.BooleanField(default=False)
+    notify_weekly_summary = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Settings for {self.user.username}"
+    

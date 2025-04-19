@@ -1,3 +1,9 @@
 django
 matplotlib
 pyserial
+django-crontab
+celery
+redis
+django-celery-beat
+python-decouple
+python-dotenv

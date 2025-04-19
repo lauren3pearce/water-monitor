@@ -18,7 +18,8 @@ class UserSettingsForm(forms.ModelForm):
             'high_conductivity_threshold', 
             'reading_interval_seconds',
             'notify_low_water',
-            'notify_high_conductivity'
+            'notify_high_conductivity',
+            'notify_weekly_summary'
         ]
         labels = {
             'low_water_threshold': 'Low Water Level Alert Threshold (%)',
@@ -26,4 +27,5 @@ class UserSettingsForm(forms.ModelForm):
             'reading_interval_seconds': 'Reading Interval (seconds)',
             'notify_low_water': 'Email me for low water level alerts',
             'notify_high_conductivity': 'Email me for high conductivity alerts',
+            'notify_weekly_summary': 'Email me a weekly summary',
         }
