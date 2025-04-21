@@ -315,3 +315,71 @@ select {
     font-weight: bold;
     margin-top: 10px;
 }
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+}
+
+.login-card {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-card h2 {
+    color: #0b2c3a;
+    margin-bottom: 10px;
+}
+
+.login-card p {
+    font-size: 14px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.form-group {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+    color: #0b2c3a;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+button[type="submit"] {
+    background-color: #0b2c3a;
+    color: white;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button[type="submit"]:hover {
+    background-color: #d3f9d8;
+    color: #0b2c3a;
+}
+
+.signup-link {
+    margin-top: 20px;
+    font-size: 14px;
+}

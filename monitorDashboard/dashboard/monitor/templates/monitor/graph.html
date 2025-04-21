@@ -12,8 +12,6 @@
     <a href="{% url 'water_level_graph' %}"><button type="button">Reset</button></a>
 </form>
 
-
-
 <label style="margin-left: 20px;">
     <input type="checkbox" id="liveToggle" checked>
     Live Mode
@@ -29,6 +27,8 @@
     const initialTimestamps = {{ timestamps|safe }};
     const initialWaterLevels = {{ water_levels|safe }};
     const initialConductivity = {{ conductivity|safe }};
+    const waterThreshold = {{ water_threshold }};
+    const conductivityThreshold = {{ conductivity_threshold }};
 
     const trace1 = {
         x: initialTimestamps,
@@ -52,13 +52,61 @@
         title: 'Water Level and Conductivity Over Time',
         xaxis: { title: 'Time' },
         yaxis: { title: 'Values' },
+        shapes: [
+            {
+                type: 'line',
+                x0: 0,
+                x1: 1,
+                xref: 'paper',
+                y0: waterThreshold,
+                y1: waterThreshold,
+                line: {
+                    color: 'blue',
+                    width: 2,
+                    dash: 'dashdot'
+                }
+            },
+            {
+                type: 'line',
+                x0: 0,
+                x1: 1,
+                xref: 'paper',
+                y0: conductivityThreshold,
+                y1: conductivityThreshold,
+                line: {
+                    color: 'green',
+                    width: 2,
+                    dash: 'dashdot'
+                }
+            }
+        ],
+        annotations: [
+            {
+                xref: 'paper',
+                x: 1.01,
+                y: waterThreshold,
+                xanchor: 'left',
+                text: `Water Threshold (${waterThreshold}%)`,
+                showarrow: false,
+                font: { color: 'blue' }
+            },
+            {
+                xref: 'paper',
+                x: 1.01,
+                y: conductivityThreshold,
+                xanchor: 'left',
+                text: `Conductivity Threshold (${conductivityThreshold} µS/cm)`,
+                showarrow: false,
+                font: { color: 'green' }
+            }
+        ]
     };
 
     Plotly.newPlot('graph', [trace1, trace2], layout);
 
     function fetchLatestDataAndExtend() {
         const liveMode = document.getElementById("liveToggle").checked;
-        if (!liveMode) return; //  Don't update if live mode is OFF
+        if (!liveMode) return;
 
         fetch("{% url 'get_graph_data' %}")
             .then(response => response.json())
