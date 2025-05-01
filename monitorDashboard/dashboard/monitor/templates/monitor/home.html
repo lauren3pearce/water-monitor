@@ -19,26 +19,39 @@
         <a href="{% url 'water_data' %}"><button>View Full Data</button></a>
     </div>
 
-    <!-- Mini Graph Card -->
+    <!-- Weekly Summary Card -->
     <div class="card">
+        <h2>Weekly Summary</h2>
+        <p>{{ summary_text }}</p>
+        <p><strong>Average Water Level:</strong> {{ avg_water }}%</p>
+        <p><strong>Average Conductivity:</strong> {{ avg_cond }} µS/cm</p>
+        <p><strong>Low Water Alerts:</strong> {{ low_water_count }} triggered</p>
+        <p><strong>High Conductivity Alerts:</strong> {{ high_cond_count }} triggered</p>
+    </div>
+
+        <!-- Alerts Card -->
+        <div class="card">
+            <h2>Last Alert</h2>
+            <h2> </h2>
+            {% if alert %}
+                <div class="inline-alert">
+                     {{ alert }}
+                </div>
+            {% else %}
+                <p>All systems normal. No alerts at this time.</p>
+            {% endif %}
+            <h2> </h2>
+            <h2> </h2>
+            <a href="{% url 'alerts' %}"><button>View All Alerts</button></a>
+        </div>
+
+    <!-- Mini Graph Card -->
+    <div class="card span-2">
         <h2>Recent Readings Graph</h2>
         <div id="mini-graph" style="height: 250px;"></div>
         <a href="{% url 'water_level_graph' %}">
             <button>View Full Graph</button>
         </a>
-    </div>
-
-    <!-- Alerts Card -->
-    <div class="card span-2">
-        <h2>Last Alert</h2>
-        {% if alert %}
-            <div class="inline-alert">
-                 {{ alert }}
-            </div>
-        {% else %}
-            <p>All systems normal. No alerts at this time.</p>
-        {% endif %}
-        <a href="{% url 'alerts' %}"><button>View All Alerts</button></a>
     </div>
 
 </div>

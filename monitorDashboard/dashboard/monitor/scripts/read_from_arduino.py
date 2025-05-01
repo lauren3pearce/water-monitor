@@ -2,17 +2,17 @@ import serial
 import django
 import os
 import sys
+import time
 
-# Setup Django so we can access models
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')  # adjust if needed
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dashboard.settings')  # adjust if needed
+
+# Django setup
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dashboard.settings')
 django.setup()
 
-from monitor.models import WaterData
+from monitor.models import WaterData, UserSettings
 from django.contrib.auth.models import User
-from datetime import datetime
 
-# Update this with your Arduino port
 arduino_port = "COM6"
 baud_rate = 9600
 
@@ -23,19 +23,27 @@ except serial.SerialException as e:
     print(f"Error: {e}")
     sys.exit()
 
-# Replace this with the correct user in your system
-USERNAME = 'laurenp'  # or your admin/test user
-
+USERNAME = 'laurenp'
 try:
     user = User.objects.get(username=USERNAME)
-except User.DoesNotExist:
-    print("User not found.")
+    settings = UserSettings.objects.get(user=user)
+except Exception as e:
+    print(f"Error getting user/settings: {e}")
     sys.exit()
 
+# Send updated thresholds to Arduino
+def send_thresholds():
+    threshold_msg = f"THRESHOLDS:{settings.low_water_threshold},{settings.high_conductivity_threshold}\n"
+    ser.write(threshold_msg.encode())
+    print(f"Sent thresholds: {threshold_msg.strip()}")
+    time.sleep(1)  # Give Arduino time to process
+
+send_thresholds()
+
+print("Reading Arduino data... (press Ctrl+C to stop)")
 water_level = None
 conductivity = None
 
-print("Reading Arduino data... (press Ctrl+C to stop)")
 try:
     while True:
         line = ser.readline().decode('utf-8').strip()
@@ -45,13 +53,10 @@ try:
             water_level = int(line.split(":")[1].strip())
         elif "Conductivity:" in line:
             conductivity = int(line.split(":")[1].strip())
-
             if water_level is not None:
-                # Save to DB
                 data = WaterData(user=user, water_level=water_level, conductivity=conductivity)
                 data.save()
                 print(f"Saved: WL={water_level}, Cond={conductivity}, Time={data.timestamp}")
-
 except KeyboardInterrupt:
     print("Stopped.")
 finally:

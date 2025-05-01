@@ -19,6 +19,11 @@ from django.contrib import messages
 from django.contrib.messages import get_messages
 from django.conf import settings
 from django.core.mail import send_mail
+from datetime import timedelta
+from django.utils.timezone import now
+from django.db.models import Avg
+from .models import WaterData, Alert, UserSettings
+from django.contrib.auth.models import User
 
 # Create your views here.
 
@@ -75,6 +80,26 @@ def home(request):
                     [request.user.email],
                     fail_silently=True,
                 )
+    # Historical summary
+    one_week_ago = now() - timedelta(days=7)
+    past_week_data = WaterData.objects.filter(user=request.user, timestamp__gte=one_week_ago)
+    weekly_data = WaterData.objects.filter(user=request.user, timestamp__date__gte=one_week_ago)
+    weekly_alerts = Alert.objects.filter(user=request.user, timestamp__date__gte=one_week_ago)
+
+    days_with_low_water = past_week_data.filter(water_level__lt=20).dates('timestamp', 'day').count()
+    days_with_high_conductivity = past_week_data.filter(conductivity__gt=200).dates('timestamp', 'day').count()
+    total_days = past_week_data.dates('timestamp', 'day').count()
+    avg_water = weekly_data.aggregate(avg=Avg('water_level'))['avg'] or 0
+    avg_cond = weekly_data.aggregate(avg=Avg('conductivity'))['avg'] or 0
+    low_water_count = weekly_alerts.filter(message__icontains='low water').count()
+    high_cond_count = weekly_alerts.filter(message__icontains='conductivity').count()
+
+    summary_text = "No data available this week."
+    if total_days:
+        summary_text = (
+            f"Water level was below 20% on {days_with_low_water} of {total_days} days this week. "
+            f"High conductivity (>200 µS/cm) occurred on {days_with_high_conductivity} days."
+        )
 
     context = {
         'latest_data': latest_data,
@@ -82,6 +107,11 @@ def home(request):
         'timestamps': timestamps,
         'water_levels': water_levels,
         'conductivity': conductivity,
+        'summary_text': summary_text,
+        'avg_water': round(avg_water, 1),
+        'avg_cond': round(avg_cond, 1),
+        'low_water_count': low_water_count,
+        'high_cond_count': high_cond_count,
     }
 
     return render(request, 'monitor/home.html', context)
@@ -172,15 +202,24 @@ def water_level_graph(request):
     water_levels = [entry.water_level for entry in data]
     conductivity = [entry.conductivity for entry in data]
 
+    # Get user-defined alert thresholds
+    settings = UserSettings.objects.filter(user=request.user).first()
+    water_threshold = settings.low_water_threshold if settings else 20
+    conductivity_threshold = settings.high_conductivity_threshold if settings else 200
+
     context = {
         'timestamps': json.dumps(timestamps),
         'water_levels': json.dumps(water_levels),
         'conductivity': json.dumps(conductivity),
         'start_date': start_date or '',
         'end_date': end_date or '',
+        'water_threshold': water_threshold,
+        'conductivity_threshold': conductivity_threshold,
     }
 
     return render(request, 'monitor/graph.html', context)
+
+
 @login_required
 def get_graph_data(request):
     latest = WaterData.objects.filter(user=request.user).order_by('-timestamp')[:1]
@@ -299,3 +338,19 @@ def settings_view(request):
         form = UserSettingsForm(instance=settings)
 
     return render(request, 'monitor/settings.html', {'form': form})
+
+
+
+def arduino_thresholds(request, username):
+    try:
+        user = User.objects.get(username=username)
+        settings = UserSettings.objects.get(user=user)
+
+        return JsonResponse({
+            'low_water_threshold': settings.low_water_threshold,
+            'high_conductivity_threshold': settings.high_conductivity_threshold,
+        })
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    except UserSettings.DoesNotExist:
+        return JsonResponse({'error': 'Settings not found'}, status=404)
