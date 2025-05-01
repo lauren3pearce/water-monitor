@@ -1,15 +1,30 @@
-
 {% extends 'base.html' %}
 
 {% block title %}Sign Up - Water Monitor{% endblock %}
 
 {% block content %}
-    <h1>Sign Up</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Sign Up</button>
-    </form>
-    <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
-
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>Create an Account</h2>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn">Sign Up</button>
+        </form>
+        <p class="switch-auth">Already have an account?
+            <a href="{% url 'login' %}">Login here</a>
+        </p>
+    </div>
+</div>
 {% endblock %}

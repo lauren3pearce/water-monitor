@@ -383,3 +383,78 @@ button[type="submit"]:hover {
     margin-top: 20px;
     font-size: 14px;
 }
+
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.auth-card {
+    background-color: white;
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    max-width: 450px;
+    width: 100%;
+}
+
+.auth-card h2 {
+    margin-bottom: 20px;
+    color: #0b2c3a;
+    font-size: 24px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #0b2c3a;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+}
+
+.help-text {
+    font-size: 12px;
+    color: #666;
+}
+
+.error {
+    color: #c00;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.btn {
+    width: 100%;
+    background-color: #0b2c3a;
+    color: white;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn:hover {
+    background-color: #d3f9d8;
+    color: #0b2c3a;
+}
+
+.switch-auth {
+    text-align: center;
+    margin-top: 15px;
+}
