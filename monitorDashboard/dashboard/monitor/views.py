@@ -23,6 +23,7 @@ from datetime import timedelta
 from django.utils.timezone import now
 from django.db.models import Avg
 from .models import WaterData, Alert, UserSettings
+from django.contrib.auth.models import User
 
 # Create your views here.
 
@@ -337,3 +338,19 @@ def settings_view(request):
         form = UserSettingsForm(instance=settings)
 
     return render(request, 'monitor/settings.html', {'form': form})
+
+
+
+def arduino_thresholds(request, username):
+    try:
+        user = User.objects.get(username=username)
+        settings = UserSettings.objects.get(user=user)
+
+        return JsonResponse({
+            'low_water_threshold': settings.low_water_threshold,
+            'high_conductivity_threshold': settings.high_conductivity_threshold,
+        })
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    except UserSettings.DoesNotExist:
+        return JsonResponse({'error': 'Settings not found'}, status=404)

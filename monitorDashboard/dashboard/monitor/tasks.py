@@ -7,6 +7,23 @@ from django.contrib.auth.models import User
 from datetime import timedelta
 from django.db.models import Avg
 
+
+@shared_task
+def send_alert_email(user_id, message):
+    try:
+        user = User.objects.get(id=user_id)
+        subject = "Water Monitor Alert"
+        send_mail(
+            subject,
+            message,
+            None,  # Uses DEFAULT_FROM_EMAIL from settings
+            [user.email],
+            fail_silently=False,
+        )
+    except User.DoesNotExist:
+        pass  # or log error
+    
+    
 @shared_task
 def send_weekly_summary_emails():
     one_week_ago = timezone.now() - timedelta(days=7)

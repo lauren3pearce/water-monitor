@@ -12,4 +12,5 @@ urlpatterns = [
     path('alerts/export/', views.export_alerts_csv, name='export_alerts_csv'),
     path('graph/data/', views.get_graph_data, name='get_graph_data'),
     path('settings/', views.settings_view, name='settings'),
+    path('api/thresholds/<str:username>/', views.arduino_thresholds, name='arduino_thresholds'),
 ]

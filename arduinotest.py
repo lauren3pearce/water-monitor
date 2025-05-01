@@ -8,7 +8,7 @@ arduino_port = "COM6"
 baud_rate = 9600       # Match the baud rate of my Arduino
 log_file = "water_data.csv"
 
-# Initialize serial connection
+# initialize serial connection
 try:
     ser = serial.Serial(arduino_port, baud_rate, timeout=1)
     print(f"Connected to Arduino on {arduino_port}")
@@ -26,7 +26,7 @@ def log_data(water_level, conductivity):
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     new_entry = pd.DataFrame([{"Timestamp": timestamp, "Water Level": water_level, "Conductivity": conductivity}])
     data = pd.concat([data, new_entry], ignore_index=True)
-    data.to_csv(log_file, index=False)  # Save data to CSV file
+    data.to_csv(log_file, index=False)  
     print(new_entry.iloc[0].to_dict())  # Print to console
 
 # Function to plot data
